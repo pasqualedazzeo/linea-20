@@ -12,20 +12,42 @@ const MAX_FONT_SIZE = 150;
 
 // Create buttons
 function createButtons() {
-  for (let i = 1; i <= 20; i++) {
-    const button = document.createElement('button');
-    button.className = 'toggle-btn';
-    button.setAttribute('aria-pressed', 'false');
-    button.setAttribute('aria-label', `Tasto ${i}`);
-    button.setAttribute('data-number', i);
-    button.textContent = i;
-    
-    // Add event listeners
-    button.addEventListener('click', () => toggleButton(button));
-    button.addEventListener('keydown', (e) => handleKeyPress(e, button));
-    
-    buttonsContainer.appendChild(button);
+  // Create rows
+  const topRow = document.createElement('div');
+  topRow.className = 'buttons-row';
+  const bottomRow = document.createElement('div');
+  bottomRow.className = 'buttons-row';
+
+  // Create buttons 11-20 (top row)
+  for (let i = 11; i <= 20; i++) {
+    const button = createButton(i);
+    topRow.appendChild(button);
   }
+
+  // Create buttons 1-10 (bottom row)
+  for (let i = 1; i <= 10; i++) {
+    const button = createButton(i);
+    bottomRow.appendChild(button);
+  }
+
+  buttonsContainer.appendChild(topRow);
+  buttonsContainer.appendChild(bottomRow);
+}
+
+// Helper function to create individual buttons
+function createButton(number) {
+  const button = document.createElement('button');
+  button.className = 'toggle-btn';
+  button.setAttribute('aria-pressed', 'false');
+  button.setAttribute('aria-label', `Tasto ${number}`);
+  button.setAttribute('data-number', number);
+  button.textContent = number;
+  
+  // Add event listeners
+  button.addEventListener('click', () => toggleButton(button));
+  button.addEventListener('keydown', (e) => handleKeyPress(e, button));
+  
+  return button;
 }
 
 // Toggle button state
@@ -33,7 +55,7 @@ function toggleButton(button) {
   const isPressed = button.getAttribute('aria-pressed') === 'true';
   button.setAttribute('aria-pressed', (!isPressed).toString());
   
-  // Announce state change
+  // Announce state change and number
   const number = button.getAttribute('data-number');
   announceState(number, !isPressed);
 }
