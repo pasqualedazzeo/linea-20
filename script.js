@@ -4,107 +4,82 @@ const increaseFontBtn = document.getElementById('increase-font');
 const decreaseFontBtn = document.getElementById('decrease-font');
 const toggleContrastBtn = document.getElementById('toggle-contrast');
 const resetAllBtn = document.getElementById('reset-all');
+const toggleInstructionsBtn = document.getElementById('toggle-instructions');
+const instructionsPanel = document.getElementById('instructions-panel');
 
-// State
+// Font size state
 let currentFontSize = 100;
 const MIN_FONT_SIZE = 80;
 const MAX_FONT_SIZE = 150;
 
-// Create buttons
+// Create 20 keys arranged in 4 groups of 5 keys each
 function createButtons() {
-  // Create rows
-  const topRow = document.createElement('div');
-  topRow.className = 'buttons-row';
-  const bottomRow = document.createElement('div');
-  bottomRow.className = 'buttons-row';
-
-  // Create buttons 11-20 (top row)
-  for (let i = 11; i <= 20; i++) {
-    const button = createButton(i);
-    topRow.appendChild(button);
+  buttonsContainer.innerHTML = '';
+  for (let groupIndex = 0; groupIndex < 4; groupIndex++) {
+    const groupDiv = document.createElement('div');
+    groupDiv.className = 'button-group';
+    for (let i = 1; i <= 5; i++) {
+      const number = groupIndex * 5 + i; // Numbers 1 to 20
+      const button = document.createElement('button');
+      button.className = 'toggle-btn';
+      button.setAttribute('data-number', number);
+      button.setAttribute('aria-pressed', 'false');
+      button.textContent = number;
+      // Apply color classes: keys 1–10 red, 11–20 green.
+      if (number <= 10) {
+        button.classList.add('red-tile');
+      } else {
+        button.classList.add('green-tile');
+      }
+      // Click and keyboard events:
+      button.addEventListener('click', () => toggleButton(button));
+      button.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ' || e.key === 'Spacebar') {
+          e.preventDefault();
+          toggleButton(button);
+        }
+      });
+      groupDiv.appendChild(button);
+    }
+    buttonsContainer.appendChild(groupDiv);
   }
-
-  // Create buttons 1-10 (bottom row)
-  for (let i = 1; i <= 10; i++) {
-    const button = createButton(i);
-    bottomRow.appendChild(button);
-  }
-
-  buttonsContainer.appendChild(topRow);
-  buttonsContainer.appendChild(bottomRow);
 }
 
-// Helper function to create individual buttons
-function createButton(number) {
-  const button = document.createElement('button');
-  button.className = 'toggle-btn';
-  button.setAttribute('aria-pressed', 'false');
-  button.setAttribute('aria-label', `Tasto ${number}`);
-  button.setAttribute('data-number', number);
-  button.textContent = number;
-  
-  // Add event listeners
-  button.addEventListener('click', () => toggleButton(button));
-  button.addEventListener('keydown', (e) => handleKeyPress(e, button));
-  
-  return button;
-}
-
-// Toggle button state
+// Toggle the button state and announce via speech synthesis
 function toggleButton(button) {
   const isPressed = button.getAttribute('aria-pressed') === 'true';
   button.setAttribute('aria-pressed', (!isPressed).toString());
-  
-  // Announce state change and number
-  const number = button.getAttribute('data-number');
-  announceState(number, !isPressed);
+  announceState(button.getAttribute('data-number'), !isPressed);
 }
 
-// Handle keyboard interaction
-function handleKeyPress(event, button) {
-  if (event.key === 'Enter' || event.key === ' ' || event.key === 'Spacebar') {
-    event.preventDefault();
-    toggleButton(button);
-  }
-}
-
-// Text-to-speech announcement
-function announceState(number, isPressed) {
+function announceState(number, state) {
   if ('speechSynthesis' in window) {
-    const msg = new SpeechSynthesisUtterance();
+    const msg = new SpeechSynthesisUtterance(`Tasto ${number} ${state ? 'attivato' : 'disattivato'}`);
     msg.lang = 'it-IT';
-    msg.text = `Tasto ${number} ${isPressed ? 'attivato' : 'disattivato'}`;
-    
-    // Cancel any ongoing speech
     window.speechSynthesis.cancel();
     window.speechSynthesis.speak(msg);
   }
 }
 
-// Font size controls
+// Update font size and announce change
 function updateFontSize(change) {
   currentFontSize = Math.min(Math.max(currentFontSize + change, MIN_FONT_SIZE), MAX_FONT_SIZE);
-  document.documentElement.style.fontSize = `${currentFontSize}%`;
-  
-  // Announce font size change
+  document.documentElement.style.fontSize = currentFontSize + '%';
   announceMessage(`Dimensione testo ${change > 0 ? 'aumentata' : 'diminuita'} al ${currentFontSize} percento`);
 }
 
-// High contrast toggle
+// Toggle high contrast mode
 function toggleHighContrast() {
-  const isHighContrast = document.body.classList.toggle('high-contrast');
-  announceMessage(`Modalità alto contrasto ${isHighContrast ? 'attivata' : 'disattivata'}`);
+  const active = document.body.classList.toggle('high-contrast');
+  announceMessage(`Modalità alto contrasto ${active ? 'attivata' : 'disattivata'}`);
 }
 
-// Reset all buttons
+// Reset all keys
 function resetAll() {
-  document.querySelectorAll('.toggle-btn').forEach(button => {
-    button.setAttribute('aria-pressed', 'false');
-  });
+  document.querySelectorAll('.toggle-btn').forEach(btn => btn.setAttribute('aria-pressed', 'false'));
   announceMessage('Tutti i tasti reimpostati');
 }
 
-// Generic announcement function
 function announceMessage(message) {
   if ('speechSynthesis' in window) {
     const msg = new SpeechSynthesisUtterance(message);
@@ -114,61 +89,108 @@ function announceMessage(message) {
   }
 }
 
-// Event Listeners
-increaseFontBtn.addEventListener('click', () => updateFontSize(10));
-decreaseFontBtn.addEventListener('click', () => updateFontSize(-10));
-toggleContrastBtn.addEventListener('click', toggleHighContrast);
-resetAllBtn.addEventListener('click', resetAll);
-
-// Keyboard shortcuts
+// Keyboard shortcuts for controls (Ctrl/Cmd + +, -, H)
 document.addEventListener('keydown', (e) => {
-  // Ctrl/Cmd + Plus: Increase font size
   if ((e.ctrlKey || e.metaKey) && e.key === '+') {
     e.preventDefault();
     updateFontSize(10);
   }
-  // Ctrl/Cmd + Minus: Decrease font size
   if ((e.ctrlKey || e.metaKey) && e.key === '-') {
     e.preventDefault();
     updateFontSize(-10);
   }
-  // Ctrl/Cmd + H: Toggle high contrast
-  if ((e.ctrlKey || e.metaKey) && e.key === 'h') {
+  if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'h') {
     e.preventDefault();
     toggleHighContrast();
   }
 });
 
-// Initialize
-document.addEventListener('DOMContentLoaded', () => {
-  createButtons();
-  announceMessage('Linea del 20 pronta all\'uso');
+// --- Multi-Touch / Drag Selection Support ---
+let isDragging = false;
+let toggledDuringDrag = new Set();
+
+// Start drag selection
+buttonsContainer.addEventListener('pointerdown', (e) => {
+  if (e.pointerType === 'touch' || (e.pointerType === 'mouse' && e.button === 0)) {
+    const target = e.target.closest('.toggle-btn');
+    if (target) {
+      isDragging = true;
+      toggledDuringDrag.add(target);
+      toggleButton(target);
+    }
+  }
 });
 
-// Save preferences to localStorage
+// Continue drag selection: toggle any new key encountered
+buttonsContainer.addEventListener('pointermove', (e) => {
+  if (isDragging) {
+    const target = document.elementFromPoint(e.clientX, e.clientY);
+    if (target && target.closest('.toggle-btn')) {
+      const btn = target.closest('.toggle-btn');
+      if (!toggledDuringDrag.has(btn)) {
+        toggledDuringDrag.add(btn);
+        toggleButton(btn);
+      }
+    }
+  }
+});
+
+// End drag selection
+window.addEventListener('pointerup', () => {
+  if (isDragging) {
+    isDragging = false;
+    toggledDuringDrag.clear();
+  }
+});
+
+// Toggle the instructions panel visibility
+toggleInstructionsBtn.addEventListener('click', () => {
+  const collapsed = instructionsPanel.classList.contains('collapsed');
+  if (collapsed) {
+    instructionsPanel.classList.remove('collapsed');
+    instructionsPanel.setAttribute('aria-hidden', 'false');
+    toggleInstructionsBtn.setAttribute('aria-expanded', 'true');
+  } else {
+    instructionsPanel.classList.add('collapsed');
+    instructionsPanel.setAttribute('aria-hidden', 'true');
+    toggleInstructionsBtn.setAttribute('aria-expanded', 'false');
+  }
+});
+
+// Save preferences (font size, high contrast) to localStorage
 function savePreferences() {
-  const preferences = {
+  const prefs = {
     fontSize: currentFontSize,
     highContrast: document.body.classList.contains('high-contrast')
   };
-  localStorage.setItem('linea20Preferences', JSON.stringify(preferences));
+  localStorage.setItem('linea20Prefs', JSON.stringify(prefs));
 }
 
-// Load preferences from localStorage
+// Load saved preferences
 function loadPreferences() {
-  const saved = localStorage.getItem('linea20Preferences');
+  const saved = localStorage.getItem('linea20Prefs');
   if (saved) {
-    const preferences = JSON.parse(saved);
-    currentFontSize = preferences.fontSize;
-    document.documentElement.style.fontSize = `${currentFontSize}%`;
-    if (preferences.highContrast) {
+    const prefs = JSON.parse(saved);
+    currentFontSize = prefs.fontSize || 100;
+    document.documentElement.style.fontSize = currentFontSize + '%';
+    if (prefs.highContrast) {
       document.body.classList.add('high-contrast');
     }
   }
 }
 
-// Save preferences when changed
+// Event listeners for accessibility controls
+increaseFontBtn.addEventListener('click', () => updateFontSize(10));
+decreaseFontBtn.addEventListener('click', () => updateFontSize(-10));
+toggleContrastBtn.addEventListener('click', toggleHighContrast);
+resetAllBtn.addEventListener('click', resetAll);
+
+// Save preferences before unloading the page
 window.addEventListener('beforeunload', savePreferences);
 
-// Load preferences on start
-loadPreferences();
+// Initialize when the DOM is ready
+document.addEventListener('DOMContentLoaded', () => {
+  createButtons();
+  loadPreferences();
+  announceMessage("Linea del 20 pronta all'uso");
+});
