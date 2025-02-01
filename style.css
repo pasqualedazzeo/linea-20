@@ -154,19 +154,24 @@ body.high-contrast .toggle-btn[aria-pressed="true"] {
   color: #000;
 }
 
-/* Responsive Adjustments */
-@media (max-width: 600px) {
+/* Responsive Adjustments for Optimal Mobile Visibility */
+@media (max-width: 600px) and (orientation: portrait) {
   .buttons-container {
-    flex-wrap: nowrap;
-    overflow-x: hidden;
-    justify-content: space-between;
+    display: none;
   }
-  .button-group {
-    flex: 0 0 25%;
-    margin-bottom: 0;
-  }
-  .toggle-btn {
-    aspect-ratio: 1 / 3;
-    font-size: 1.5rem;
+  body::after {
+    content: "Ruota il tuo dispositivo per visualizzare la Linea del 20.";
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: #fff;
+    padding: 1rem;
+    border: 2px solid #2c3e50;
+    z-index: 1000;
+    font-size: 1rem;
+    text-align: center;
+    width: 90%;
+    box-sizing: border-box;
   }
 }

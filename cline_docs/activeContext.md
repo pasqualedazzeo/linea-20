@@ -32,3 +32,7 @@ Initial project setup with core functionality implemented:
    - Tutorial mode implementation
    - Printable worksheet generation
    - Progress tracking and analytics
+
+## Checkpoint
+- Commit "checkpoint: mobile layout adjustments and docs update" created on 2/1/2025.
+- Observations: Mobile view in portrait mode still shows tiles misaligned; for optimal view, users should rotate the device to landscape mode.
