@@ -35,4 +35,11 @@ Initial project setup with core functionality implemented:
 
 ## Checkpoint
 - Commit "checkpoint: mobile layout adjustments and docs update" created on 2/1/2025.
-- Observations: Mobile view in portrait mode still shows tiles misaligned; for optimal view, users should rotate the device to landscape mode.
+- Observations: Mobile view in portrait mode hides the grid as intended; however, in landscape mode issues persist with uniform tile sizing across iOS and PC browsers.
+
+## Memory Bank Update (as of 2/1/2025, 1:12 PM)
+- The project "Linea del 20" focuses on providing an accessible, interactive number grid optimized for multiple devices.
+- Recent efforts have centered on refining the CSS Grid layout to ensure that in landscape mode, all 20 tiles are uniformly sized without horizontal scrolling.
+- Challenges remain with iOS Safari and some PC browsers: iOS devices sometimes exhibit inconsistent grid column widths due to fractional rounding issues, and on PC the first few tiles appear slightly smaller.
+- Current strategies include switching grid units from percentages to fractional units (using 1fr), applying vendor prefixes for better iOS support, and considering JavaScript-based adjustments on orientation changes.
+- The product aims to deliver a user-friendly, accessible experience for children, and resolving these layout issues is critical for ensuring that all users – regardless of device – have an optimal viewing experience.
